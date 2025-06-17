@@ -9,14 +9,14 @@ uint8_t dataID;
 int32_t DataValue;
 } Data_t;
 
-// Global variables
+
 int32_t G_DataValue; 
 uint8_t G_DataID;    
 QueueHandle_t Queue1;
 TaskHandle_t TaskHandle_1;
 TaskHandle_t TaskHandle_2;
 
-// Task 1: Sends data to Queue1 every 500ms
+// Task 1
 void ExampleTask1(void *pV) {
     Data_t data;
     const TickType_t xDelay = pdMS_TO_TICKS(500); // 500ms delay
@@ -36,7 +36,7 @@ void ExampleTask1(void *pV) {
     }
 }
 
-// Task 2: Receives data from Queue1 and processes it
+// Task 2: Receives data
 void ExampleTask2(void *pV) {
     Data_t data;
     UBaseType_t originalPriority = uxTaskPriorityGet(NULL); // Get initial priority
@@ -44,44 +44,30 @@ void ExampleTask2(void *pV) {
     while (1) {
         // Receive data from Queue1
         if (xQueueReceive(Queue1, &data, portMAX_DELAY) == pdPASS) {
-            // Print dataID and DataValue
             printf("Received: dataID = %u, DataValue = %ld\n", data.dataID, data.DataValue);
-
-            // Process based on dataID
             if (data.dataID == 0) {
-                // Delete ExampleTask2
                 vTaskDelete(NULL);
             } else if (data.dataID == 1) {
-                // Process DataValue
                 if (data.DataValue == 0) {
-                    // Increase priority by 2
                     vTaskPrioritySet(NULL, originalPriority + 2);
                     printf("Increased priority to %u\n", originalPriority + 2);
                 } else if (data.DataValue == 1) {
-                    // Decrease priority if previously increased
                     if (uxTaskPriorityGet(NULL) > originalPriority) {
                         vTaskPrioritySet(NULL, originalPriority);
-                        printf("Restored priority to %u\n", originalPriority);
-                    }
+                        printf("Restored priority to %u\n", originalPriority); }
                 } else if (data.DataValue == 2) {
-                    // Delete ExampleTask2
                     vTaskDelete(NULL);
-                }
-            }
-        }
-    }
-}
+                }}}}}
 
-// Main function to initialize tasks and queue
+// Main function
 void app_main(void) {
-    // Create Queue1 with size 5 and Data_t type
+    // Create Queue1 with size 5 and Datat
     Queue1 = xQueueCreate(5, sizeof(Data_t));
     if (Queue1 == NULL) {
         printf("Failed to create Queue1\n");
         return;
     }
-
-    // Create ExampleTask1 with priority 2
+ // Create ExampleTask1 with priority 2
     if (xTaskCreate(ExampleTask1, "Task1", 2048, NULL, 2, &TaskHandle_1) != pdPASS) {
         printf("Failed to create ExampleTask1\n");
         return;
